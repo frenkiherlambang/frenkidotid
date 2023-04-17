@@ -6,21 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>👋 Frenki Herlambang | Fullstack Dev </title>
-    <meta name="description" content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
+    <meta name="description"
+        content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
     <meta name="keywords" content="full-stack developer, indie hacker, Laravel, SaaS, coffee">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index,follow">
     <link rel="canonical" href="{{ url('/') }}">
     <!-- Open Graph Protocol tags for social media -->
     <meta property="og:title" content="👋 Frenki Herlambang | Fullstack Dev ">
-    <meta property="og:description" content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
+    <meta property="og:description"
+        content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
     <meta property="og:image" content="{{asset('images/profile.png')}}">
     <meta property="og:url" content="{{url('/')}}">
     <meta property="og:type" content="website">
 
     <!-- Twitter Card tags for social media -->
     <meta name="twitter:title" content="👋 Frenki Herlambang | Fullstack Dev ">
-    <meta name="twitter:description" content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
+    <meta name="twitter:description"
+        content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
     <meta name="twitter:image" content="{{asset('images/profile.png')}}">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="apple-touch-icon" sizes="128x128" href="{{asset('images/profile.png')}}">
@@ -42,10 +45,25 @@
             display: none;
         }
     </style>
+    <!-- Matomo -->
+    <script>
+        var _paq = window._paq = window._paq || [];
+      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="//matomo.frenki.id/";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', '1']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
 </head>
 
 <body>
-    <header aria-label="Site Header" class="bg-white shadow md:hidden ">
+    <header aria-label="Site Header" class="bg-white md:hidden ">
         <div class="flex items-center h-16 max-w-screen-xl gap-8 px-4 mx-auto sm:px-6 lg:px-8">
             <a class="block text-xl font-bold text-black" href="/">
                 Frenki Herlambang
