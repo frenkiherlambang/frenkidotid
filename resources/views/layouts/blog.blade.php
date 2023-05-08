@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>👋 Frenki Herlambang | Fullstack Dev </title>
+    {{-- dynamic title for blog --}}
+    <title>{{ isset($title) ? $title .' - '. config('app.name', 'Frenki'): config('app.name', 'Frenki') }}</title>
     <meta name="description"
         content="a full-stack developer specializing in Laravel, and an indie hacker with a passion for creating digital products and SaaS businesses">
     <meta name="keywords" content="full-stack developer, indie hacker, Laravel, SaaS, coffee">
@@ -39,13 +40,11 @@
         body {
             font-family: 'Heebo', sans-serif;
         }
-
         /* cloak */
         [x-cloak] {
             display: none;
         }
     </style>
-
 </head>
 
 <body>
@@ -79,20 +78,6 @@
                 </nav>
 
                 <div class="flex items-center gap-4">
-                    {{-- <div class="sm:flex sm:gap-4">
-                        <a class="block rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700"
-                            href="/">
-                            Login
-                        </a>
-
-                        <a class="hidden rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-teal-600 transition hover:text-teal-600/75 sm:block"
-                            href="/">
-                            Register
-                        </a>
-                    </div> --}}
-
-
-
                     <div x-data="{ isActive: false }" class="relative">
                         <div
                             class="inline-flex items-center overflow-hidden bg-white border divide-x divide-gray-100 rounded-md">
@@ -133,15 +118,10 @@
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
             </div>
         </div>
     </header>
-
-
     <main class="flex md:h-screen h-[calc(100vh-64px)] ">
         <div
             class="flex-col items-center justify-center hidden pt-5 pb-4 overflow-y-auto align-middle bg-white border-r border-gray-200 shadow md:flex min-w-fit">
@@ -228,7 +208,6 @@
 
         </div>
     </main>
-
     @livewireScripts
 </body>
 
