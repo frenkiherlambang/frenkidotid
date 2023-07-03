@@ -15,10 +15,17 @@ use App\Http\Controllers\ProfileController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+// ROute for subdomain
+Route::domain('portfolio.'.env('APP_URL'))->group(function () {
+    Route::get('/', function () {
+        return view('portfolio');
+    });
+});
 Route::get('/', function () {
     return view('welcome');
 });
+
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
