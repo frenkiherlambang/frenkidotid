@@ -65,7 +65,7 @@
                         </li>
 
                         <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75" href="{{route('portofolio')}}">
+                            <a class="text-gray-500 transition hover:text-gray-500/75" href="https://portofolio.frenki.id">
                                 Projects
                             </a>
                         </li>
@@ -118,7 +118,7 @@
                                     About
                                 </a>
 
-                                <a href="{{route('portofolio')}}"
+                                <a href="https://portofolio.frenki.id"
                                     class="block px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-50 hover:text-gray-700"
                                     role="menuitem">
                                     Projects
@@ -163,7 +163,7 @@
                             About
                         </a>
 
-                        <a href="{{route('portofolio')}}"
+                        <a href="https://portofolio.frenki.id"
                             class="block py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-50 hover:text-gray-700"
                             role="menuitem">
                             Projects
