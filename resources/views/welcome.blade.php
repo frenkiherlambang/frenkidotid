@@ -65,7 +65,7 @@
                         </li>
 
                         <li>
-                            <a class="text-gray-500 transition hover:text-gray-500/75" href="https://portofolio.frenki.id">
+                            <a class="text-gray-500 transition hover:text-gray-500/75" href="https://portfolio.frenki.id">
                                 Projects
                             </a>
                         </li>
