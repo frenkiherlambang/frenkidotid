@@ -163,7 +163,7 @@
                             About
                         </a>
 
-                        <a href="https://portofolio.frenki.id"
+                        <a href="https://portfolio.frenki.id"
                             class="block py-2 text-sm text-gray-500 rounded-lg hover:bg-gray-50 hover:text-gray-700"
                             role="menuitem">
                             Projects
