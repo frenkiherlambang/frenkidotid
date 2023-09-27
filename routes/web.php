@@ -2,8 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\BlogContorller;
 use App\Http\Controllers\ProfileController;
+use Spatie\Health\Http\Controllers\HealthCheckResultsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +25,12 @@ Route::domain('portfolio.'.env('APP_URL'))->group(function () {
 });
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('health', HealthCheckResultsController::class);
+
+Route::get('/reset-galon', function () {
+    Storage::disk('local')->put('cart-count.json', '0');
 });
 
 
