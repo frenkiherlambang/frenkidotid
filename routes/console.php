@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Storage;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Artisan::command('test-schedule', function () {
+    Log::info('scheduling test');
+})->purpose('Scheduling test');
 
 
 Artisan::command('capture', function () {
