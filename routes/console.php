@@ -26,17 +26,88 @@ Artisan::command('test-schedule', function () {
     Log::info('scheduling test');
 })->purpose('Scheduling test');
 
+Artisan::command('parse-cpns', function () {
+    // Get the JSON file path
+    $jsonFilePath = database_path('cpns.json');
 
+    // Check if the file exists
+    if (!file_exists($jsonFilePath)) {
+        $this->error('JSON file does not exist.');
+        return;
+    }
+
+    // Read the JSON file content
+    $jsonContent = file_get_contents($jsonFilePath);
+
+    // Parse the JSON data into an array
+    $data = json_decode($jsonContent, true);
+
+    // Check if JSON parsing was successful
+    if ($data === null) {
+        $this->error('Error parsing JSON data.');
+        return;
+    }
+
+    // Define the CSV file path
+    $csvFilePath = storage_path('app/cpns.csv');
+
+    // Open the CSV file for writing
+    $csvFile = fopen($csvFilePath, 'w');
+
+    // Write a header row if needed
+    // fputcsv($csvFile, ['Column1', 'Column2', ...]);
+
+    // Loop through the data and write each item to the CSV file
+    foreach ($data as $item) {
+        // Write the item to the CSV file
+        fputcsv($csvFile, $item);
+    }
+
+    // Close the CSV file
+    fclose($csvFile);
+
+    $this->info('JSON data has been successfully converted to a CSV file.');
+});
 Artisan::command('capture', function () {
     // create progress bar
-    $data = Http::get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
+    try {
+        $data = Http::timeout(10)->get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
+
+    } catch (Exception $e) {
+        Log::error('Exception', $e->getMessage());
+        Http::withHeaders(
+            ['Content-Type' => 'application/json']
+        )->post('https://ntfy.frenki.id', [
+            'topic' => 'general',
+            'title' => 'Error Fetch MAM',
+            'message' => $e->getMessage()
+        ]);
+    }
     $bar = $this->output->createProgressBar(count($data));
+    $errorCount = 0;
     foreach ($data as $d) {
         $bar->advance();
-        if (!is_dir(storage_path('app/public/capture/' . now()->format('Y-m-d')))) {
-            mkdir(storage_path('app/public/capture/' . now()->format('Y-m-d')));
+        if (!is_dir(storage_path('app/public/capture/' . now()->format('Y-m-d_H')))) {
+            mkdir(storage_path('app/public/capture/' . now()->format('Y-m-d_H')), 0777, true);
         }
-        $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . now()->format('Y-m-d') . '/' . $d['attributes']['stream-name'] . '.jpg'));
+        try {
+            $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . now()->format('Y-m-d_H') . '/' . $d['attributes']['stream-name'] . '.jpg'));
+        } catch( Exception $e ) {
+            Log::error('Exception', $e->getMessage());
+
+            // implement throttling
+            if($errorCount < 3) {
+                Http::withHeaders(
+                    ['Content-Type' => 'application/json']
+                )->post('https://ntfy.frenki.id', [
+                    'topic' => 'general',
+                    'title' => 'Error Capture CCTV',
+                    'message' => $e->getMessage()
+                ]);
+                $errorCount++;
+            }
+
+        }
     }
     $bar->finish();
 })->purpose('Capture command run successfully!');

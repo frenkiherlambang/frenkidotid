@@ -27,10 +27,30 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/snapshots/{date?}', function (?string $date = null) {
+    if(!$date)
+    {
+        $dirs = Storage::disk('public')->directories(('capture'));
+        return view('snapshots.index', compact('dirs'));
+    } else {
+        // check if the date directory exists
+        $exists = Storage::disk('public')->exists('capture/'.$date);
+        if($exists) {
+            $files = Storage::disk('public')->allFiles('capture/'.$date);
+            return view('snapshots.files', compact('files', 'date'));
+        }
+    }
+
+});
+
 Route::get('health', HealthCheckResultsController::class);
 
 Route::get('/reset-galon', function () {
     Storage::disk('local')->put('cart-count.json', '0');
+});
+
+Route::get('/yourstruly', function () {
+    return view('yourstruly');
 });
 
 
