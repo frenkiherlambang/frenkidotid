@@ -3,7 +3,7 @@ import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
     define: {
-        global: {},
+        global: 'window',
     },
     server: {
         host: true,
