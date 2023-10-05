@@ -85,7 +85,7 @@ Artisan::command('capture', function () {
         $data = Http::timeout(10)->get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
 
     } catch (Exception $e) {
-        Log::error('Exception', $e->getMessage());
+        Log::error('Exception'. $e->getMessage());
         Http::withHeaders(
             ['Content-Type' => 'application/json']
         )->post('https://ntfy.frenki.id', [
