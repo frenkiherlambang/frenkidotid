@@ -29,10 +29,14 @@
 
         @foreach ($files as $file)
             <div class="flex flex-col p-4 items-center justify-center rounded-xl shadow-xl border">
-                <a href="{{ asset('storage/' . $file) }}">
+                {{-- <a href="{{ asset('storage/' . $file) }}">
                     <img src="{{ asset('storage/' . $file) }}" alt="" class="w-48 object-cover" />
 
+                </a> --}}
+                <a href="https://bucket.frenki.id/frenkibucket/{{$file}}">
+                    <img src="https://bucket.frenki.id/frenkibucket/{{$file}}" alt="" class="w-48 object-cover" />
                 </a>
+
 
                 <p class="text-center text-sm">{{ explode($date . '/', $file)[1] }}</p>
             </div>

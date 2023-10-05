@@ -13,10 +13,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command(\Spatie\Health\Commands\RunHealthChecksCommand::class)->everyMinute();
+        $schedule->command(\Spatie\Health\Commands\RunHealthChecksCommand::class)->everyFiveMinutes();
         // $schedule->command('test-schedule')->everyMinute();
+        $schedule->command('capture')->hourly();
+        $schedule->command('delete-old-cctv-images')->hourlyAt(45);
         $schedule->command('check-galon')->everyThirtyMinutes();
-        // $schedule->command('inspire')->
     }
 
     /**

@@ -68,6 +68,17 @@ Artisan::command('parse-cpns', function () {
 
     $this->info('JSON data has been successfully converted to a CSV file.');
 });
+Artisan::command('delete-old-cctv-images', function () {
+    $dirs = Storage::disk('public')->allDirectories('capture');
+    rsort($dirs);
+    foreach($dirs as $key => $dir) {
+        if($key > 24)
+        {
+            Storage::disk('public')->deleteDirectory($dir);
+        }
+
+    }
+});
 Artisan::command('capture', function () {
     // create progress bar
     try {
@@ -87,13 +98,18 @@ Artisan::command('capture', function () {
     $errorCount = 0;
     foreach ($data as $d) {
         $bar->advance();
-        if (!is_dir(storage_path('app/public/capture/' . now()->format('Y-m-d_H')))) {
-            mkdir(storage_path('app/public/capture/' . now()->format('Y-m-d_H')), 0777, true);
+        $captureDirectory = now()->format('Y-m-d_H');
+
+        if (!is_dir(storage_path('app/public/capture/' . $captureDirectory))) {
+            mkdir(storage_path('app/public/capture/' . $captureDirectory), 0777, true);
         }
         try {
-            $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . now()->format('Y-m-d_H') . '/' . $d['attributes']['stream-name'] . '.jpg'));
+            $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg'));
+
+            $storagePath = 'capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg';
+            Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
         } catch( Exception $e ) {
-            Log::error('Exception', $e->getMessage());
+            Log::error('Exception'. $e->getMessage());
 
             // implement throttling
             if($errorCount < 3) {
