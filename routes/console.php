@@ -107,7 +107,17 @@ Artisan::command('capture', function () {
             $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg'));
 
             $storagePath = 'capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg';
-            Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
+            if(Storage::disk('public')->exists($storagePath)) {
+                Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
+            } else {
+                Http::withHeaders(
+                    ['Content-Type' => 'application/json']
+                )->post('https://ntfy.frenki.id', [
+                    'topic' => 'cctv',
+                    'title' => $d['attributes']['stream-name'] . 'tidak dapat diakses',
+                    'message' => $d['attributes']['stream-name'] . 'tidak dapat diakses'
+                ]);
+            }
         } catch( Exception $e ) {
             Log::error('Exception'. $e->getMessage());
 
