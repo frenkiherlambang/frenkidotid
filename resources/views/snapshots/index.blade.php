@@ -12,7 +12,7 @@
         ])
 </head>
 <body>
-    <div class="flex flex-col gap-2 my-12 items-center justify-center">
+    <div class="flex max-w-4xl flex-wrap mx-auto gap-2 my-12 items-center justify-center">
     @foreach($dirs as $dir)
      {{-- {{ $dir}} --}}
      <div class="border p-4">

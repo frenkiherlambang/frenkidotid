@@ -12,7 +12,8 @@ module.exports = {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                albert: ['Albert Sans']
+                albert: ['Albert Sans'],
+                bilbo: ['Bilbo Swash Caps', 'handwriting']
             },
         },
     },

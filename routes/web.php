@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\BlogContorller;
@@ -18,6 +19,7 @@ use Spatie\Health\Http\Controllers\HealthCheckResultsController;
 |
 */
 // ROute for subdomain
+// URL::forceScheme('https');
 Route::domain('portfolio.'.env('APP_URL'))->group(function () {
     Route::get('/', function () {
         return view('portfolio');
@@ -26,11 +28,17 @@ Route::domain('portfolio.'.env('APP_URL'))->group(function () {
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::get('/test-print', function () {
+    return view('test-print');
+});
+Route::get('/printd', function () {
+    return view('print');
+});
 Route::get('/snapshots/{date?}', function (?string $date = null) {
     if(!$date)
     {
         $dirs = Storage::disk('public')->directories(('capture'));
+        rsort($dirs);
         return view('snapshots.index', compact('dirs'));
     } else {
         // check if the date directory exists
