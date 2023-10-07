@@ -71,21 +71,18 @@ Artisan::command('parse-cpns', function () {
 Artisan::command('delete-old-cctv-images', function () {
     $dirs = Storage::disk('public')->allDirectories('capture');
     rsort($dirs);
-    foreach($dirs as $key => $dir) {
-        if($key > 24)
-        {
+    foreach ($dirs as $key => $dir) {
+        if ($key > 24) {
             Storage::disk('public')->deleteDirectory($dir);
         }
-
     }
 });
 Artisan::command('capture', function () {
     // create progress bar
     try {
         $data = Http::timeout(10)->get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
-
     } catch (Exception $e) {
-        Log::error('Exception'. $e->getMessage());
+        Log::error('Exception' . $e->getMessage());
         Http::withHeaders(
             ['Content-Type' => 'application/json']
         )->post('https://ntfy.frenki.id', [
@@ -96,6 +93,7 @@ Artisan::command('capture', function () {
     }
     $bar = $this->output->createProgressBar(count($data));
     $errorCount = 0;
+    $errorData = array();
     foreach ($data as $d) {
         $bar->advance();
         $captureDirectory = now()->format('Y-m-d_H');
@@ -107,22 +105,23 @@ Artisan::command('capture', function () {
             $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg'));
 
             $storagePath = 'capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg';
-            if(Storage::disk('public')->exists($storagePath)) {
+            if (Storage::disk('public')->exists($storagePath)) {
                 Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
             } else {
-                Http::withHeaders(
-                    ['Content-Type' => 'application/json']
-                )->post('https://ntfy.frenki.id', [
-                    'topic' => 'cctv',
-                    'title' => $d['attributes']['stream-name'] . 'tidak dapat diakses',
-                    'message' => $d['attributes']['stream-name'] . 'tidak dapat diakses'
-                ]);
+                $errorData[] = $d['attributes']['stream-name'];
+                // Http::withHeaders(
+                //     ['Content-Type' => 'application/json']
+                // )->post('https://ntfy.frenki.id', [
+                //     'topic' => 'cctv',
+                //     'title' => $d['attributes']['stream-name'] . ' tidak dapat diakses',
+                //     'message' => $d['attributes']['stream-name'] . ' tidak dapat diakses'
+                // ]);
             }
-        } catch( Exception $e ) {
-            Log::error('Exception'. $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Exception' . $e->getMessage());
 
             // implement throttling
-            if($errorCount < 3) {
+            if ($errorCount < 3) {
                 Http::withHeaders(
                     ['Content-Type' => 'application/json']
                 )->post('https://ntfy.frenki.id', [
@@ -132,8 +131,17 @@ Artisan::command('capture', function () {
                 ]);
                 $errorCount++;
             }
-
         }
+    }
+    if (count($errorData) > 0) {
+
+        Http::withHeaders(
+            ['Content-Type' => 'application/json']
+        )->post('https://ntfy.frenki.id', [
+            'topic' => 'cctv',
+            'title' => 'daftar cctvs yang tidak dapat diakses',
+            'message' => implode("\n", $errorData),
+        ]);
     }
     $bar->finish();
 })->purpose('Capture command run successfully!');
@@ -157,7 +165,7 @@ Artisan::command('check-galon', function () {
                 'User-Agent' => 'okhttp/3.12.10',
             ])
                 ->get('https://api.klikindomaret.com/api/ShoppingCart/GetMyCartCount?customerId=9fb33423-fab4-48d8-8424-b35ddd618739');
-                // update cart count
+            // update cart count
             Storage::disk('local')->put('cart-count.json', intval($getMyCartCount->body()[1]));
             Http::withHeaders(
                 ['Content-Type' => 'application/json']
@@ -168,5 +176,4 @@ Artisan::command('check-galon', function () {
             ]);
         }
     }
-
 })->purpose('check galon di klik indomaret');
