@@ -14,12 +14,13 @@
 </head>
 
 <body >
-    <div class="h-screen w-full bg-red-500">
-        {{-- <img class="w-48" src="{{ asset('images/yourstruly/1.jpg') }}" alt=""> --}}
+    <div class="h-screen w-full bg-red-500 max-w-xl mx-auto">
+        <div class="w-full h-screen">
+            <img class="w-full h-screen object-cover" src="{{ asset('images/yourstruly/1.jpg') }}" alt="">
+        </div>
         {{-- <div class="py-2 absolute shadow bottom-2 right-0  text-4xl font-bilbo  px-4 flex z-10 text-red-500 ">
             Yourstruly
         </div> --}}
     </div>
 </body>
-
 </html>

@@ -69,11 +69,19 @@ Artisan::command('parse-cpns', function () {
     $this->info('JSON data has been successfully converted to a CSV file.');
 });
 Artisan::command('delete-old-cctv-images', function () {
-    $dirs = Storage::disk('public')->allDirectories('capture');
+    $dirs = Storage::disk('public')->directories('capture');
+    $dirs_r2 = Storage::disk('r2')->directories('frenkibucket/capture');
+    rsort($dirs_r2);
     rsort($dirs);
     foreach ($dirs as $key => $dir) {
         if ($key > 24) {
             Storage::disk('public')->deleteDirectory($dir);
+
+        }
+    }
+    foreach ($dirs_r2 as $key => $dir) {
+        if ($key >= 48) {
+            Storage::disk('r2')->deleteDirectory($dir);
         }
     }
 });
