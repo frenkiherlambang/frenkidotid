@@ -33,8 +33,8 @@
                     <img src="{{ asset('storage/' . $file) }}" alt="" class="w-48 object-cover" />
 
                 </a> --}}
-                <a href="https://bucket.frenki.id/frenkibucket/{{$file}}">
-                    <img src="https://bucket.frenki.id/frenkibucket/{{$file}}" alt="" class="w-48 object-cover" />
+                <a href="https://bucket.frenki.id/{{$file}}">
+                    <img src="https://bucket.frenki.id/{{$file}}" alt="" class="w-48 object-cover" />
                 </a>
 
 
