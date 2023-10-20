@@ -25,6 +25,10 @@ Route::domain('portfolio.'.env('APP_URL'))->group(function () {
         return view('portfolio');
     });
 });
+
+Route::get('cctv-map', function (Request $request) {
+    return view('cctv-map');
+});
 Route::get('/', function () {
     return view('welcome');
 });
