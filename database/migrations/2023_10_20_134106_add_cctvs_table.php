@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('stream_name')->nullable();
             $table->text('stream_url')->nullable();
-            $table->unsignedInteger('error_count')->nullable();
+            $table->unsignedInteger('error_count')->default(0);
             $table->boolean('low_priority')->nullable();
             $table->timestamps();
         });
