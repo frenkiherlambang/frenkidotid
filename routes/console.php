@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Cctv;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
@@ -111,19 +112,18 @@ Artisan::command('capture', function () {
         }
         try {
             $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg'));
+            Cctv::updateOrCreate([
+                'stream_name' => $d['attributes']['stream-name'],
+            ],[
+                'stream_url' => $d['attributes']['stream-url'],
+            ]);
 
             $storagePath = 'capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg';
             if (Storage::disk('public')->exists($storagePath)) {
                 Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
             } else {
                 $errorData[] = $d['attributes']['stream-name'];
-                // Http::withHeaders(
-                //     ['Content-Type' => 'application/json']
-                // )->post('https://ntfy.frenki.id', [
-                //     'topic' => 'cctv',
-                //     'title' => $d['attributes']['stream-name'] . ' tidak dapat diakses',
-                //     'message' => $d['attributes']['stream-name'] . ' tidak dapat diakses'
-                // ]);
+                Cctv::where('stream_name', $d['attributes']['stream-name'])->increment('error_count');
             }
         } catch (Exception $e) {
             Log::error('Exception' . $e->getMessage());
@@ -179,9 +179,24 @@ Artisan::command('check-galon', function () {
                 ['Content-Type' => 'application/json']
             )->post('https://ntfy.frenki.id', [
                 'topic' => 'general',
-                'title' => 'Lapor! ada Galon!',
-                'message' => "Lapor!ada galon di KlikIndomaret!"
+                'title' => 'Lapor! Ada Galon!',
+                'message' => "Lapor! Ada galon di KlikIndomaret!"
             ]);
         }
     }
 })->purpose('check galon di klik indomaret');
+
+Artisan::command('download-image {name?}', function ($name = null) {
+     Storage::makeDirectory($name);
+    $storagePath = storage_path($name);
+    // dd($storagePath.'/'.$name);
+    $dirs_r2 = Storage::disk('r2')->directories('capture');
+    $bar = $this->output->createProgressBar(count($dirs_r2));
+    foreach($dirs_r2 as $dir)
+    {
+        Process::run('cd storage/app/'.$name.' && curl https://bucket.frenki.id/'.$dir.'/'.$name.'.jpg > '.$name.'-'.str_replace('capture/', '', $dir).'.jpg');
+        $bar->advance();
+    }
+    $bar->finish();
+
+});

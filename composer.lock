@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60e1f18cb69a7704e27747f9ca595c23",
+    "content-hash": "8500f9c98d29794367243636b4c47bbc",
     "packages": [
         {
             "name": "andreaselia/analytics",
