@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cctvs', function (Blueprint $table) {
+            $table->id();
             $table->string('stream_name')->nullable();
             $table->text('stream_url')->nullable();
             $table->unsignedInteger('error_count')->nullable();
