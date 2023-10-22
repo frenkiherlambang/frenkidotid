@@ -128,6 +128,7 @@ Artisan::command('capture', function () {
     $errorCount = 0;
     $errorData = array();
     foreach ($data as $d) {
+        dd($d);
         $bar->advance();
         $captureDirectory = now()->format('Y-m-d_H');
 
@@ -135,19 +136,19 @@ Artisan::command('capture', function () {
             mkdir(storage_path('app/public/capture/' . $captureDirectory), 0777, true);
         }
         try {
-            $process = Process::run('ffmpeg -i ' . $d['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['stream-name'] . '.jpg'));
+            $process = Process::run('ffmpeg -i ' . $d['stream_url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['stream_name'] . '.jpg'));
             // Cctv::updateOrCreate([
             //     'stream_name' => $d['stream-name'],
             // ],[
             //     'stream_url' => $d['stream-url'],
             // ]);
 
-            $storagePath = 'capture/' . $captureDirectory . '/' . $d['stream-name'] . '.jpg';
+            $storagePath = 'capture/' . $captureDirectory . '/' . $d['stream_name'] . '.jpg';
             if (Storage::disk('public')->exists($storagePath)) {
                 Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
             } else {
-                $errorData[] = $d['stream-name'];
-                Cctv::where('stream_name', $d['stream-name'])->increment('error_count');
+                $errorData[] = $d['stream_name'];
+                Cctv::where('stream_name', $d['stream_name'])->increment('error_count');
             }
         } catch (Exception $e) {
             Log::error('Exception' . $e->getMessage());
