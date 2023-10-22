@@ -86,10 +86,17 @@ Artisan::command('delete-old-cctv-images', function () {
         }
     }
 });
-Artisan::command('capture', function () {
-    // create progress bar
+Artisan::command('update_cctv_db', function() {
     try {
         $data = Http::timeout(10)->get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
+        foreach ($data as $d) {
+            Cctv::updateOrCreate([
+                'stream_name' => $d['attributes']['stream-name'],
+            ],[
+                'stream_url' => $d['attributes']['stream-url'],
+            ]);
+
+        }
     } catch (Exception $e) {
         Log::error('Exception' . $e->getMessage());
         Http::withHeaders(
@@ -100,6 +107,23 @@ Artisan::command('capture', function () {
             'message' => $e->getMessage()
         ]);
     }
+});
+Artisan::command('capture', function () {
+    // create progress bar
+    try {
+        // $data = Http::timeout(10)->get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
+    } catch (Exception $e) {
+        // Log::error('Exception' . $e->getMessage());
+        // Http::withHeaders(
+        //     ['Content-Type' => 'application/json']
+        // )->post('https://ntfy.frenki.id', [
+        //     'topic' => 'general',
+        //     'title' => 'Error Fetch MAM',
+        //     'message' => $e->getMessage()
+        // ]);
+    }
+    $data = Cctv::where('error_count', 0)->get()->toArray();
+    // dd(count($data));
     $bar = $this->output->createProgressBar(count($data));
     $errorCount = 0;
     $errorData = array();
@@ -111,19 +135,19 @@ Artisan::command('capture', function () {
             mkdir(storage_path('app/public/capture/' . $captureDirectory), 0777, true);
         }
         try {
-            $process = Process::run('ffmpeg -i ' . $d['attributes']['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg'));
-            Cctv::updateOrCreate([
-                'stream_name' => $d['attributes']['stream-name'],
-            ],[
-                'stream_url' => $d['attributes']['stream-url'],
-            ]);
+            $process = Process::run('ffmpeg -i ' . $d['stream-url'] . ' -vframes 1 -q:v 2 ' . storage_path('app/public/capture/' . $captureDirectory . '/' . $d['stream-name'] . '.jpg'));
+            // Cctv::updateOrCreate([
+            //     'stream_name' => $d['stream-name'],
+            // ],[
+            //     'stream_url' => $d['stream-url'],
+            // ]);
 
-            $storagePath = 'capture/' . $captureDirectory . '/' . $d['attributes']['stream-name'] . '.jpg';
+            $storagePath = 'capture/' . $captureDirectory . '/' . $d['stream-name'] . '.jpg';
             if (Storage::disk('public')->exists($storagePath)) {
                 Storage::disk('r2')->put($storagePath, file_get_contents(storage_path('app/public/' . $storagePath)));
             } else {
-                $errorData[] = $d['attributes']['stream-name'];
-                Cctv::where('stream_name', $d['attributes']['stream-name'])->increment('error_count');
+                $errorData[] = $d['stream-name'];
+                Cctv::where('stream_name', $d['stream-name'])->increment('error_count');
             }
         } catch (Exception $e) {
             Log::error('Exception' . $e->getMessage());

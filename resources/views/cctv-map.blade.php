@@ -28,8 +28,47 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        L.marker([-7.800119, 110.370026]).addTo(map)
-        .bindPopup("<img src='https://picsum.photos/200/200' width='200'>").openPopup();
+        // L.marker([-7.800119, 110.370026]).addTo(map)
+        //     .bindPopup("<img src='https://picsum.photos/300/200' width='400'>", {
+        //         maxWidth: 560
+        //     });
+
+        L.marker([-7.782751, 110.366982]).addTo(map)
+            .bindPopup("<img src='https://bucket.frenki.id/capture/2023-10-20_22/Tugu1.jpg' width='400'>", {
+                maxWidth: 560
+            }); // Tugu1
+        L.marker([-7.782953, 110.367181]).addTo(map)
+            .bindPopup("<img src='https://bucket.frenki.id/capture/2023-10-20_22/Tugu2.jpg' width='400'>", {
+                maxWidth: 560
+            }); // Tugu2
+        L.marker([-7.78708, 110.378593]).addTo(map)
+            .bindPopup("<img src='https://bucket.frenki.id/capture/2023-10-20_19/UKDW.jpg' width='400'>", {
+                maxWidth: 560
+            }); // Tugu2
+
+
+            L.marker([-7.782905, 110.374857]).addTo(map)
+            .bindPopup("<img src='https://bucket.frenki.id/capture/2023-10-20_19/Gramedia.jpg' width='400'>", {
+                maxWidth: 560
+            }); //
+
+
+            L.marker([-7.801356, 110.364850]).addTo(map)
+            .bindPopup("<img src='https://bucket.frenki.id/capture/2023-10-20_19/KMNol.jpg' width='400'>", {
+                maxWidth: 560
+            }); //
+
+            L.marker([-7.799629, 110.364813]).addTo(map)
+            .bindPopup("<img src='https://bucket.frenki.id/capture/2023-10-20_19/UPTMalio24_SimpangReksobayan.jpg' width='400'>", {
+                maxWidth: 560
+            }); //
+
+
+        map.on('click', onMapClick);
+
+        function onMapClick(e) {
+            alert("You clicked the map at " + e.latlng);
+        }
     </script>
 </body>
 
