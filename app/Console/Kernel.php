@@ -15,8 +15,9 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command(\Spatie\Health\Commands\RunHealthChecksCommand::class)->everyFiveMinutes();
         // $schedule->command('test-schedule')->everyMinute();
-        $schedule->command('capture')->hourly();
-        $schedule->command('delete-old-cctv-images')->hourlyAt(45);
+        // $schedule->command('capture')->hourly();
+        // $schedule->command('delete-old-cctv-images')->hourlyAt(45);
+        $schedule->command('fomo:getreview')->everyFiveMinutes();
         $schedule->command('check-galon')->everyThirtyMinutes();
     }
 

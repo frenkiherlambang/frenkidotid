@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\Cctv;
+use App\Models\FomoCompany;
+use App\Models\FomoCompanyReview;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
@@ -77,7 +79,6 @@ Artisan::command('delete-old-cctv-images', function () {
     foreach ($dirs as $key => $dir) {
         if ($key > 24) {
             Storage::disk('public')->deleteDirectory($dir);
-
         }
     }
     foreach ($dirs_r2 as $key => $dir) {
@@ -86,16 +87,15 @@ Artisan::command('delete-old-cctv-images', function () {
         }
     }
 });
-Artisan::command('update_cctv_db', function() {
+Artisan::command('update_cctv_db', function () {
     try {
         $data = Http::timeout(10)->get('https://mam.jogjaprov.go.id/api/v1/cctvs?page[size]=246&fields[cctvs]=stream-url,stream-name')->json()['data'];
         foreach ($data as $d) {
             Cctv::updateOrCreate([
                 'stream_name' => $d['attributes']['stream-name'],
-            ],[
+            ], [
                 'stream_url' => $d['attributes']['stream-url'],
             ]);
-
         }
     } catch (Exception $e) {
         Log::error('Exception' . $e->getMessage());
@@ -128,7 +128,6 @@ Artisan::command('capture', function () {
     $errorCount = 0;
     $errorData = array();
     foreach ($data as $d) {
-        dd($d);
         $bar->advance();
         $captureDirectory = now()->format('Y-m-d_H');
 
@@ -212,16 +211,122 @@ Artisan::command('check-galon', function () {
 })->purpose('check galon di klik indomaret');
 
 Artisan::command('download-image {name?}', function ($name = null) {
-     Storage::makeDirectory($name);
+    Storage::makeDirectory($name);
     $storagePath = storage_path($name);
     // dd($storagePath.'/'.$name);
     $dirs_r2 = Storage::disk('r2')->directories('capture');
     $bar = $this->output->createProgressBar(count($dirs_r2));
-    foreach($dirs_r2 as $dir)
-    {
-        Process::run('cd storage/app/'.$name.' && curl https://bucket.frenki.id/'.$dir.'/'.$name.'.jpg > '.$name.'-'.str_replace('capture/', '', $dir).'.jpg');
+    foreach ($dirs_r2 as $dir) {
+        Process::run('cd storage/app/' . $name . ' && curl https://bucket.frenki.id/' . $dir . '/' . $name . '.jpg > ' . $name . '-' . str_replace('capture/', '', $dir) . '.jpg');
         $bar->advance();
     }
     $bar->finish();
+});
+
+
+Artisan::command('fomo:getreview', function () {
+    if (!Storage::disk('local')->exists('fomo_companyReviewCount.json')) {
+        Storage::disk('local')->put('fomo_companyReviewCount.json', '0');
+    }
+    $headers = [
+        'Authorization' => 'Basic Mzc4NDk6YnNJcm5zenJYbFBTQUhCTnhMU0hieUNMV3NlUkVD',
+        'Cookie' => 'ARRAffinity=cf18e8207138f47a7b4a4eebc73ec3a1b7a03719e40af63eca3d1dcb9e7d8ee7; ARRAffinitySameSite=cf18e8207138f47a7b4a4eebc73ec3a1b7a03719e40af63eca3d1dcb9e7d8ee7',
+        'User-Agent' => 'okhttp/3.12.10',
+    ];
+    $request = Http::withHeaders($headers)->get('https://fomo.azurewebsites.net/salary?page=2&limit=30');
+    // print_r(json_decode($request->body())->data);
+    foreach (json_decode($request->body())->data as $value) {
+
+
+        // dd($value->inner->user->profilePictureUrl);
+
+
+        if ($value->inner->type == 'SALARY') {
+            if($value->inner->user->profilePictureUrl) {
+                $response = Http::get($value->inner->user->profilePictureUrl);
+
+                $imageContent = $response->body();
+
+                $imageName = substr($value->inner->user->profilePictureUrl, strrpos($value->inner->user->profilePictureUrl, '/') + 1);
+
+                Storage::disk('public')->put('company-images/' . $imageName, $imageContent);
+
+                $imageUrl = Storage::disk('public')->url('company-images/' . $imageName);
+            }
+
+            // print_r($value->inner);
+            FomoCompany::updateOrCreate([
+                'company_id' => $value->inner->user->companyId,
+                'jobTitle' => $value->inner->jobTitle->value,
+
+            ], [
+                'company_name' => $value->inner->user->companyName,
+                'baseMonthlySalaryInRupiah' => $value->inner->baseMonthlySalaryInRupiah,
+                'annualBonusInRupiah' => $value->inner->annualBonusInRupiah,
+                'roleLevel' => $value->inner->roleLevel != null ? $value->inner->roleLevel->value : null,
+                'yearsOfExperience' => $value->inner->yearsOfExperience,
+                'company_image' => isset($imageUrl) ? $imageUrl : null,
+            ]);
+        }
+    }
+});
+
+
+Artisan::command('fomo:companyreview', function () {
+
+    if (!Storage::disk('local')->exists('fomo_companyReviewCount.json')) {
+        Storage::disk('local')->put('fomo_companyReviewCount.json', '0');
+    }
+
+    $prevReviewCount = Storage::disk('local')->get('fomo_companyReviewCount.json');
+    $currentReviewCount = FomoCompanyReview::count();
+    // dump('prev: '.$prevReviewCount);
+    // dump('current: '.$currentReviewCount);
+    // while (Storage::disk('local')->get('fomo_companyReviewCount.json') != FomoCompanyReview::count()) {
+    // dump('prev: '.Storage::disk('local')->get('fomo_companyReviewCount.json'));
+    // dump('current: '.FomoCompanyReview::count());
+    // sleep(5);
+
+    Storage::disk('local')->put('fomo_companyReviewCount.json', intval(FomoCompanyReview::count()));
+    $headers = [
+        'Authorization' => 'Basic Mzc4NDk6YnNJcm5zenJYbFBTQUhCTnhMU0hieUNMV3NlUkVD',
+        'Cookie' => 'ARRAffinity=cf18e8207138f47a7b4a4eebc73ec3a1b7a03719e40af63eca3d1dcb9e7d8ee7; ARRAffinitySameSite=cf18e8207138f47a7b4a4eebc73ec3a1b7a03719e40af63eca3d1dcb9e7d8ee7'
+    ];
+    $request = Http::withHeaders($headers)->get('https://fomo.azurewebsites.net/companyReview?page=2');
+    // print_r(json_decode($request->body())->data);
+    $i = 1;
+    foreach (json_decode($request->body())->data as $value) {
+
+        if ($value->inner->type == 'COMPANY_REVIEW') {
+            $i++;
+            // print_r($value->inner);
+
+            FomoCompanyReview::updateOrCreate([
+                'company_id' => $value->inner->user->companyId,
+                'activity_id' => $value->inner->activityId
+            ], [
+                'company_id' => $value->inner->user->companyId,
+                'company_name' => $value->inner->user->companyName,
+                'pros' => implode(' | ', $value->inner->pros),
+                'cons' => implode(' | ', $value->inner->cons),
+                'rating' => $value->inner->rating,
+                'job_title' => $value->inner->jobTitle->value,
+                'title' => $value->inner->title,
+                'content' => $value->inner->content,
+                'number_of_likes' => $value->inner->numberOfLikes,
+                'number_of_dislikes' => $value->inner->numberOfDislikes,
+                'number_of_comments' => $value->inner->numberOfComments
+            ]);
+        }
+    }
+    // }
+
+
+    // dump('CurrentReviewCount:'.$reviewCount);
+    // if($reviewCount == FomoCompanyReview::count()) {
+    //     dump('reviewCountStopped:'.$reviewCount);
+    //     return;
+    // }
+
 
 });

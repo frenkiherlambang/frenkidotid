@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\BlogContorller;
+use App\Http\Controllers\FomoController;
 use App\Http\Controllers\ProfileController;
 use Spatie\Health\Http\Controllers\HealthCheckResultsController;
 
@@ -85,5 +86,9 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/blog', [BlogContorller::class, 'index'])->name('blog');
 
+Route::prefix('fomo')->group(function () {
+    Route::get('/company', [FomoController::class, 'companyReview'])->name('fomo.company.index');
+    Route::get('/company/{activityId}', [FomoController::class, 'companyComments'])->name('fomo.company.showComments');
+});
 
 require __DIR__.'/auth.php';
